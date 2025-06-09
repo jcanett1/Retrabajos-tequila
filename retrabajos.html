@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sistema de Gestión de Retrabajos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+  <style id="app-style">
+    :root {
+      --primary-color: #0056b3;
+      --secondary-color: #6c757d;
+      --success-color: #28a745;
+      --background-color: #f8f9fa;
+      --border-color: #dee2e6;
+    }
+
+    body {
+      background-color: var(--background-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .app-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      border: none;
+    }
+
+    .card-header {
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 10px 10px 0 0 !important;
+      padding: 15px 20px;
+      font-weight: 600;
+    }
+
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #495057;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+      background-color: #004494;
+      border-color: #004494;
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      border-color: var(--secondary-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #5a6268;
+      border-color: #5a6268;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+    }
+
+    .btn-success:hover {
+      background-color: #218838;
+      border-color: #218838;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .table th {
+      background-color: #e9ecef;
+      color: #495057;
+      font-weight: 600;
+    }
+
+    .export-buttons {
+      margin-bottom: 15px;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 0.25em solid rgba(0, 0, 0, 0.1);
+      border-right-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spinner 1s linear infinite;
+    }
+
+    @keyframes spinner {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .required-field::after {
+      content: '*';
+      color: red;
+      margin-left: 4px;
+    }
+
+    .invalid-feedback {
+      display: none;
+      width: 100%;
+      margin-top: 0.25rem;
+      font-size: 0.875em;
+      color: #dc3545;
+    }
+
+    .is-invalid ~ .invalid-feedback {
+      display: block;
+    }
+
+    .form-control.is-invalid, .form-select.is-invalid {
+      border-color: #dc3545;
+    }
+
+    .filter-section {
+      background-color: #e9ecef;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    #selectedPartsContainer {
+      margin-top: 10px;
+    }
+
+    .selected-part-badge {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+
+    .selected-part-badge .remove-part {
+      margin-left: 5px;
+      cursor: pointer;
+    }
+
+    .flatpickr-input {
+      background-color: white !important;
+    }
+
+    @media (max-width: 768px) {
+      .card-body {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <h1 class="text-center mb-4">Sistema de Gestión de Retrabajos</h1>
+    
+    <!-- Formulario de Entrada -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Registrar Nuevo Retrabajo</span>
+      </div>
+      <div class="card-body">
+        <form id="retrabajoForm">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="fechaCreacion" class="form-label required-field">Fecha de Creación</label>
+              <input type="text" class="form-control" id="fechaCreacion" placeholder="Seleccionar fecha" required>
+              <div class="invalid-feedback">Por favor seleccione una fecha.</div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="numeroOrden" class="form-label required-field">Número de Orden</label>
+              <input type="text" class="form-control" id="numeroOrden" placeholder="Ingresar número de orden" required>
+              <div class="invalid-feedback">Por favor ingrese el número de orden.</div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="tipoDefecto" class="form-label required-field">Tipo de Defecto</label>
+              <select class="form-select" id="tipoDefecto" required>
+                <option value="" selected disabled>Seleccionar tipo</option>
+                <option value="kitteo">Kitteo</option>
+                <option value="preparacion">Preparación</option>
+                <option value="orden cancelada">Orden Cancelada</option>
+                <option value="defecto de proceso">Defecto de Proceso</option>
+                <option value="defecto de proveedor">Defecto de Proveedor</option>
+              </select>
+              <div class="invalid-feedback">Por favor seleccione un tipo de defecto.</div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="celda" class="form-label required-field">Celda</label>
+              <select class="form-select" id="celda" required>
+                <option value="" selected disabled>Seleccionar celda</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+              </select>
+              <div class="invalid-feedback">Por favor seleccione una celda.</div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="codigoDefecto" class="form-label required-field">Código de Defecto</label>
+              <select class="form-select" id="codigoDefecto" required>
+                <option value="" selected disabled>Seleccionar código</option>
+                <option value="shaft rayado/dañado">Shaft Rayado/Dañado</option>
+                <option value="defecto en pieza">Defecto en Pieza</option>
+                <option value="falta de material">Falta de Material</option>
+                <option value="error de montaje">Error de Montaje</option>
+                <option value="probelma de calibracion">Problema de Calibración</option>
+              </select>
+              <div class="invalid-feedback">Por favor seleccione un código de defecto.</div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="parteRecibidaId" class="form-label required-field">Parte Recibida ID</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="parteRecibidaId" placeholder="Seleccionar parte" readonly required>
+                <button class="btn btn-outline-secondary" type="button" id="seleccionarParteBtn" data-bs-toggle="modal" data-bs-target="#partesModal">
+                  Seleccionar Parte
+                </button>
+              </div>
+              <div id="selectedPartsContainer" class="mt-2"></div>
+              <div class="invalid-feedback">Por favor seleccione al menos una parte.</div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="cantidad" class="form-label required-field">Cantidad</label>
+              <input type="number" class="form-control" id="cantidad" min="1" placeholder="Ingresar cantidad" required>
+              <div class="invalid-feedback">Por favor ingrese una cantidad válida.</div>
+            </div>
+            <div class="col-md-8 d-flex align-items-end mb-3">
+              <button type="submit" class="btn btn-primary me-2">
+                <i class="fas fa-plus-circle"></i> Agregar Retrabajo
+              </button>
+              <button type="button" id="limpiarFormularioBtn" class="btn btn-secondary">
+                <i class="fas fa-eraser"></i> Limpiar Formulario
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="card filter-section">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <label for="filtroFecha" class="form-label">Filtrar por Fecha</label>
+            <input type="text" class="form-control" id="filtroFecha" placeholder="Seleccionar rango de fechas">
+          </div>
+          <div class="col-md-6">
+            <label for="filtroCelda" class="form-label">Filtrar por Celda</label>
+            <select class="form-select" id="filtroCelda">
+              <option value="todas" selected>Todas</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tabla de Retrabajos -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Listado de Retrabajos</span>
+        <div class="export-buttons">
+          <button class="btn btn-success btn-sm me-2" id="exportExcelBtn">
+            <i class="fas fa-file-excel"></i> Exportar a Excel
+          </button>
+          <button class="btn btn-danger btn-sm" id="exportPdfBtn">
+            <i class="fas fa-file-pdf"></i> Exportar a PDF
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-container">
+          <table id="retrabajosTable" class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Orden</th>
+                <th>Tipo Defecto</th>
+                <th>Celda</th>
+                <th>Código Defecto</th>
+                <th>Parte ID</th>
+                <th>Cantidad</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Los datos se cargarán dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal para seleccionar partes -->
+  <div class="modal fade" id="partesModal" tabindex="-1" aria-labelledby="partesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="partesModalLabel">Seleccionar Partes</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <input type="text" class="form-control" id="buscarParteInput" placeholder="Buscar parte por ID o descripción">
+          </div>
+          <div id="partesListContainer">
+            <div class="text-center py-4">
+              <div class="loading-spinner"></div>
+              <p class="mt-2">Cargando partes disponibles...</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="confirmarSeleccionBtn" data-bs-dismiss="modal">Confirmar Selección</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modified script loading section - jQuery first -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  
+  <script id="app-script">
+    document.addEventListener('DOMContentLoaded', function() {
+      // Inicialización de Flatpickr para fechas
+      flatpickr("#fechaCreacion", {
+        locale: "es",
+        dateFormat: "d/m/Y",
+        allowInput: true,
+        defaultDate: new Date()
+      });
+      
+      flatpickr("#filtroFecha", {
+        locale: "es",
+        mode: "range",
+        dateFormat: "d/m/Y",
+        allowInput: true
+      });
+      
+      // Variables para almacenar los datos
+      let retrabajos = [];
+      let partes = [];
+      let selectedPartes = [];
+      
+      // Cargar datos simulados
+      function fetchMockData() {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve({
+              success: true,
+              data: [
+                { id: 'P001', description: 'Pieza de motor A101' },
+                { id: 'P002', description: 'Eje de transmisión B202' },
+                { id: 'P003', description: 'Componente hidráulico C303' },
+                { id: 'P004', description: 'Elemento estructural D404' },
+                { id: 'P005', description: 'Componente eléctrico E505' },
+                { id: 'P006', description: 'Pieza de freno F606' },
+                { id: 'P007', description: 'Elemento de suspensión G707' }
+              ]
+            });
+          }, 1000);
+        });
+      }
+      
+      // Cargar partes en el modal
+      async function loadPartes() {
+        const partesListContainer = document.getElementById('partesListContainer');
+        
+        try {
+          const response = await fetchMockData();
+          
+          if (response.success) {
+            partes = response.data;
+            
+            const partesHtml = `
+              <div class="list-group">
+                ${partes.map(parte => `
+                  <div class="list-group-item">
+                    <div class="form-check">
+                      <input class="form-check-input parte-checkbox" type="checkbox" value="${parte.id}" id="parte-${parte.id}">
+                      <label class="form-check-label" for="parte-${parte.id}">
+                        <strong>${parte.id}</strong> - ${parte.description}
+                      </label>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+            
+            partesListContainer.innerHTML = partesHtml;
+            
+            // Preseleccionar partes ya seleccionadas
+            selectedPartes.forEach(parteId => {
+              const checkbox = document.getElementById(`parte-${parteId}`);
+              if (checkbox) checkbox.checked = true;
+            });
+            
+            // Agregar funcionalidad de búsqueda
+            document.getElementById('buscarParteInput').addEventListener('input', filterPartes);
+          } else {
+            partesListContainer.innerHTML = '<div class="alert alert-danger">Error al cargar las partes</div>';
+          }
+        } catch (error) {
+          partesListContainer.innerHTML = '<div class="alert alert-danger">Error de conexión</div>';
+        }
+      }
+      
+      // Filtrar partes según la búsqueda
+      function filterPartes() {
+        const searchText = document.getElementById('buscarParteInput').value.toLowerCase();
+        const parteItems = document.querySelectorAll('.list-group-item');
+        
+        parteItems.forEach(item => {
+          const text = item.textContent.toLowerCase();
+          if (text.includes(searchText)) {
+            item.style.display = '';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      }
+      
+      // Inicializar el modal de partes
+      document.getElementById('seleccionarParteBtn').addEventListener('click', function() {
+        loadPartes();
+      });
+      
+      // Confirmar selección de partes
+      document.getElementById('confirmarSeleccionBtn').addEventListener('click', function() {
+        const selectedCheckboxes = document.querySelectorAll('.parte-checkbox:checked');
+        selectedPartes = Array.from(selectedCheckboxes).map(cb => cb.value);
+        
+        updateSelectedPartesDisplay();
+      });
+      
+      // Actualizar la visualización de partes seleccionadas
+      function updateSelectedPartesDisplay() {
+        const container = document.getElementById('selectedPartsContainer');
+        const parteRecibidaInput = document.getElementById('parteRecibidaId');
+        
+        if (selectedPartes.length > 0) {
+          parteRecibidaInput.value = selectedPartes.join(', ');
+          parteRecibidaInput.classList.remove('is-invalid');
+          
+          let badgesHtml = '';
+          
+          selectedPartes.forEach(parteId => {
+            badgesHtml += `
+              <span class="selected-part-badge">
+                ${parteId}
+                <i class="fas fa-times remove-part" data-parte-id="${parteId}"></i>
+              </span>
+            `;
+          });
+          
+          container.innerHTML = badgesHtml;
+          
+          // Agregar evento para eliminar partes
+          document.querySelectorAll('.remove-part').forEach(button => {
+            button.addEventListener('click', function() {
+              const parteId = this.getAttribute('data-parte-id');
+              selectedPartes = selectedPartes.filter(id => id !== parteId);
+              updateSelectedPartesDisplay();
+            });
+          });
+        } else {
+          parteRecibidaInput.value = '';
+          container.innerHTML = '';
+        }
+      }
+      
+      // Manejar envío del formulario
+      document.getElementById('retrabajoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!validateForm()) return;
+        
+        const fechaCreacion = document.getElementById('fechaCreacion').value;
+        const numeroOrden = document.getElementById('numeroOrden').value;
+        const tipoDefecto = document.getElementById('tipoDefecto').value;
+        const celda = document.getElementById('celda').value;
+        const codigoDefecto = document.getElementById('codigoDefecto').value;
+        const cantidad = document.getElementById('cantidad').value;
+        
+        // Para cada parte seleccionada, crear un registro
+        selectedPartes.forEach(parteId => {
+          const nuevoRetrabajo = {
+            fecha: fechaCreacion,
+            orden: numeroOrden,
+            tipoDefecto: tipoDefecto,
+            celda: celda,
+            codigoDefecto: codigoDefecto,
+            parteId: parteId,
+            cantidad: cantidad
+          };
+          
+          retrabajos.push(nuevoRetrabajo);
+        });
+        
+        updateTable();
+        resetForm();
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Retrabajo agregado',
+          text: 'El retrabajo ha sido registrado exitosamente',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      });
+      
+      // Validación del formulario
+      function validateForm() {
+        const form = document.getElementById('retrabajoForm');
+        const inputs = form.querySelectorAll('input, select');
+        let isValid = true;
+        
+        inputs.forEach(input => {
+          if (input.hasAttribute('required') && !input.value.trim()) {
+            input.classList.add('is-invalid');
+            isValid = false;
+          } else {
+            input.classList.remove('is-invalid');
+          }
+        });
+        
+        if (selectedPartes.length === 0) {
+          document.getElementById('parteRecibidaId').classList.add('is-invalid');
+          isValid = false;
+        }
+        
+        return isValid;
+      }
+      
+      // Limpiar formulario
+      function resetForm() {
+        const form = document.getElementById('retrabajoForm');
+        const inputs = form.querySelectorAll('input:not([type="hidden"]), select');
+        
+        inputs.forEach(input => {
+          if (input.id !== 'fechaCreacion') {
+            input.value = input.id === 'cantidad' ? '' : (input.tagName === 'SELECT' ? '' : '');
+          }
+          input.classList.remove('is-invalid');
+        });
+        
+        selectedPartes = [];
+        updateSelectedPartesDisplay();
+        
+        // Mantener la fecha actual
+        flatpickr("#fechaCreacion", {
+          locale: "es",
+          dateFormat: "d/m/Y",
+          allowInput: true,
+          defaultDate: new Date()
+        });
+      }
+      
+      // Botón para limpiar formulario
+      document.getElementById('limpiarFormularioBtn').addEventListener('click', resetForm);
+      
+      // Actualizar la tabla con los datos
+      function updateTable() {
+        const tableBody = document.querySelector('#retrabajosTable tbody');
+        tableBody.innerHTML = '';
+        
+        // Filtrar datos según los filtros aplicados
+        const filteredData = filterData();
+        
+        if (filteredData.length === 0) {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="7" class="text-center">No hay datos disponibles</td>
+            </tr>
+          `;
+          return;
+        }
+        
+        filteredData.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.fecha}</td>
+            <td>${item.orden}</td>
+            <td>${item.tipoDefecto}</td>
+            <td>${item.celda}</td>
+            <td>${item.codigoDefecto}</td>
+            <td>${item.parteId}</td>
+            <td>${item.cantidad}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+      
+      // Filtrar datos según los criterios
+      function filterData() {
+        let filtered = [...retrabajos];
+        const filtroCelda = document.getElementById('filtroCelda').value;
+        const filtroFecha = document.getElementById('filtroFecha').value;
+        
+        if (filtroCelda !== 'todas') {
+          filtered = filtered.filter(item => item.celda === filtroCelda);
+        }
+        
+        if (filtroFecha) {
+          const fechas = filtroFecha.split(' a ');
+          if (fechas.length === 2) {
+            const inicio = parseDate(fechas[0]);
+            const fin = parseDate(fechas[1]);
+            
+            filtered = filtered.filter(item => {
+              const itemFecha = parseDate(item.fecha);
+              return itemFecha >= inicio && itemFecha <= fin;
+            });
+          }
+        }
+        
+        return filtered;
+      }
+      
+      // Función para convertir fechas en formato dd/mm/yyyy a objetos Date
+      function parseDate(dateString) {
+        const parts = dateString.split('/');
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+      }
+      
+      // Actualizar tabla cuando cambien los filtros
+      document.getElementById('filtroCelda').addEventListener('change', updateTable);
+      document.getElementById('filtroFecha').addEventListener('input', updateTable);
+      
+      // Exportar a Excel
+      document.getElementById('exportExcelBtn').addEventListener('click', function() {
+        const filteredData = filterData();
+        
+        if (filteredData.length === 0) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Sin datos',
+            text: 'No hay datos para exportar'
+          });
+          return;
+        }
+        
+        const worksheet = XLSX.utils.json_to_sheet(filteredData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Retrabajos");
+        
+        // Guardar archivo
+        XLSX.writeFile(workbook, `Retrabajos_${formatDateForFilename(new Date())}.xlsx`);
+      });
+      
+      // Exportar a PDF
+      document.getElementById('exportPdfBtn').addEventListener('click', function() {
+        const filteredData = filterData();
+        
+        if (filteredData.length === 0) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Sin datos',
+            text: 'No hay datos para exportar'
+          });
+          return;
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.text("Reporte de Retrabajos", 14, 16);
+        
+        // Agregar fecha de generación
+        const today = new Date();
+        doc.setFontSize(10);
+        doc.text(`Generado: ${today.toLocaleDateString('es-ES')}`, 14, 22);
+        
+        // Convertir datos para autotable
+        const tableData = filteredData.map(item => [
+          item.fecha,
+          item.orden,
+          item.tipoDefecto,
+          item.celda,
+          item.codigoDefecto,
+          item.parteId,
+          item.cantidad
+        ]);
+        
+        doc.autoTable({
+          head: [['Fecha', 'Orden', 'Tipo Defecto', 'Celda', 'Código Defecto', 'Parte ID', 'Cantidad']],
+          body: tableData,
+          startY: 30,
+          theme: 'grid',
+          headStyles: {
+            fillColor: [0, 86, 179],
+            textColor: 255
+          }
+        });
+        
+        doc.save(`Retrabajos_${formatDateForFilename(new Date())}.pdf`);
+      });
+      
+      // Formato de fecha para nombres de archivo
+      function formatDateForFilename(date) {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}${month}${year}`;
+      }
+      
+      // Inicializar tabla vacía
+      updateTable();
+    });
+  </script>
+</body>
+</html>
