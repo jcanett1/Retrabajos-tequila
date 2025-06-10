@@ -501,26 +501,34 @@
       });
 
       // ✅ Cargar tabla desde Supabase
-      async function updateTable() {
-        const { data, error } = await supabaseClient.from('retrabajos').select();
-        if (error) console.error("Error cargando datos:", error);
-        else retrabajos = data;
+     async function updateTable() {
+  const { data, error } = await supabaseClient.from('retrabajos').select();
 
-        const tbody = document.querySelector('#retrabajosTable tbody');
-        tbody.innerHTML = retrabajos.length === 0 ?
-          `<tr><td colspan="7" class="text-center">No hay datos</td></tr>` :
-          retrabajos.map(item => `
-            <tr>
-              <td>${item.fecha}</td>
-              <td>${item.orden}</td>
-              <td>${item.tipoDefecto}</td>
-              <td>${item.celda}</td>
-              <td>${item.codigoDefecto}</td>
-              <td>${item.parteId}</td>
-              <td>${item.cantidad}</td>
-            </tr>`
-          ).join('');
-      }
+  if (error) {
+    console.error("Error al cargar datos:", error);
+    document.querySelector('#retrabajosTable tbody').innerHTML = `
+      <tr><td colspan="7" class="text-center">Error al cargar los datos</td></tr>
+    `;
+    return;
+  }
+
+  const tbody = document.querySelector('#retrabajosTable tbody');
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center">No hay datos</td></tr>`;
+  } else {
+    tbody.innerHTML = data.map(item => `
+      <tr>
+        <td>${item.fecha}</td>
+        <td>${item.orden}</td>
+        <td>${item.tipoDefecto}</td>
+        <td>${item.celda}</td>
+        <td>${item.codigoDefecto}</td>
+        <td>${item.parteId}</td>
+        <td>${item.cantidad}</td>
+      </tr>`
+    ).join('');
+  }
+}
 
       // ✅ Botones de exportación
       document.getElementById('exportExcelBtn').addEventListener('click', function () {
