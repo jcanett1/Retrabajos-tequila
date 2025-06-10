@@ -531,19 +531,32 @@
         const cantidad = document.getElementById('cantidad').value;
         
         // Para cada parte seleccionada, crear un registro
-        selectedPartes.forEach(parteId => {
-          const nuevoRetrabajo = {
-            fecha: fechaCreacion,
-            orden: numeroOrden,
-            tipoDefecto: tipoDefecto,
-            celda: celda,
-            codigoDefecto: codigoDefecto,
-            parteId: parteId,
-            cantidad: cantidad
-          };
-          
-          retrabajos.push(nuevoRetrabajo);
-        });
+for (const parteId of selectedPartes) {
+  const nuevoRetrabajo = {
+    fecha: fechaCreacion,
+    orden: numeroOrden,
+    tipoDefecto: tipoDefecto,
+    celda: celda,
+    codigoDefecto: codigoDefecto,
+    parteId: parteId,
+    cantidad: parseInt(cantidad)
+  };
+
+  console.log("Guardando:", nuevoRetrabajo); // Para debug
+
+  const { error } = await supabaseClient
+    .from('retrabajos')
+    .insert([nuevoRetrabajo]);
+
+  if (error) {
+    console.error("Error al guardar en Supabase:", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: 'No se pudo guardar el retrabajo.'
+    });
+  }
+}
         
         updateTable();
         resetForm();
