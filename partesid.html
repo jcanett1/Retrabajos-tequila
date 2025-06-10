@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lista de Partes - PXG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      vertical-align: top;
+    }
+    th {
+      background-color: #333;
+      color: white;
+      text-align: left;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      th {
+        display: none;
+      }
+      td {
+        position: relative;
+        padding-left: 50%;
+        border: none;
+        border-bottom: 1px solid #ddd;
+      }
+      td::before {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 45%;
+        white-space: nowrap;
+        font-weight: bold;
+        content: attr(data-label);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Lista de Partes - PXG Golf</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Inventory ID</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Datos dinámicos -->
+    </tbody>
+  </table>
+
+  <script>
+    // Tus datos en formato de texto plano desde el archivo subido
+    const rawData = `
+A-1IBM65819PXGCAT	Copper Cactus Ball Marker
+A-1IBM65820PXG-DT	2023 Darkness Dog Tag Ball Marker
+A-ALIGNSTICKS-WHT	PXG Player Alignment Sticks - White
+A-DARKNESS-COASTER	PXG Darkness Coaster
+A-DUO-PXG	PXG Golf Speaker - White
+A-ICU55715PXG-ALS	PXG Deluxe Alignment Stick Cover
+A-IHC62918PXG-COP	PXG Magnetic Ball Marker & Cap Clip - Rose Gold
+A-IHC62920PXG-BLK	PXG Magnetic Ball Marker & Cap Clip - Black
+A-JT-4697	Darkness Alignment Stick Cover - Black
+A-NX10SLOPE-PXG	PXG NX10 Rangefinder Slope Edition - White
+A-Q23192-ASM-2	Chrome Logo Ball Marker
+A-Q25240-ASM	Milled Starburst Ball Marker
+A-SHAFT-ADAPTER-DRIV	Driver Shaft Adapter RH
+A-SHAFT-ADAPTER-HYB	Hybrid Shaft Adapter RH
+A-SHAFT-ADPTR-DRIVLH	Driver Shaft Adapter LH
+A-SHAFT-ADPTR-HYBLH	Hybrid Shaft Adapter LH
+A-SHAFT-CTR-PC	Shaft Centering Pieces
+A-SSWEIGHT-25G	SuperStroke 25G Weight
+A-SSWEIGHT-50G	SuperStroke 50G Weight
+A-TORQUETOOL	TorqueTool-Woods/Hybrids
+A-TORQUETOOL-GEN4IR	T20 Tamper Proof Torque Wrench (GEN4 Irons)
+A-UAC17-FM	PXG Wedge Brush - Black
+A-UAC18-FM	PXG Wedge Brush - Chrome
+A-UAC28-FM	PXG Milled Divot Tool (Weighted)
+A-UAC29-FM	PXG (DRKNSS) Divot Tool
+
+... (aquí va todo el resto del contenido del archivo que subiste) ...
+
+WR-PXG7-CHR-60-12BP	Sugar Daddy III RH Chrome - 60/12BP
+    `;
+
+    const lines = rawData.trim().split('\n');
+    const tableBody = document.querySelector("table tbody");
+
+    lines.forEach(line => {
+      if (!line.trim()) return; // saltar líneas vacías
+      const [id, description] = line.trim().split(/\s+(.+)?/).filter(Boolean);
+      const row = document.createElement("tr");
+      const cell1 = document.createElement("td");
+      const cell2 = document.createElement("td");
+
+      cell1.textContent = id || 'N/A';
+      cell2.textContent = description || 'Sin descripción';
+
+      cell1.setAttribute('data-label', 'Inventory ID');
+      cell2.setAttribute('data-label', 'Descripción');
+
+      row.appendChild(cell1);
+      row.appendChild(cell2);
+
+      tableBody.appendChild(row);
+    });
+  </script>
+
+</body>
+</html>
