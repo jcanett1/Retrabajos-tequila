@@ -399,6 +399,34 @@
         });
       }
 
+function filterData() {
+  let filtered = [...retrabajos];
+
+  const filtroCelda = document.getElementById('filtroCelda').value;
+  const filtroFecha = document.getElementById('filtroFecha').value;
+
+  if (filtroCelda !== 'todas') {
+    filtered = filtered.filter(item => item.celda === filtroCelda);
+  }
+
+  if (filtroFecha) {
+    const fechas = filtroFecha.split(' a ');
+    if (fechas.length === 2) {
+      const inicio = parseDate(fechas[0]);
+      const fin = parseDate(fechas[1]);
+      filtered = filtered.filter(item => {
+        const itemFecha = parseDate(item.fecha);
+        return itemFecha >= inicio && itemFecha <= fin;
+      });
+    }
+  }
+
+  return filtered;
+}
+
+
+      
+
       // ✅ Actualizar visualización de partes seleccionadas
       function updateSelectedPartesDisplay() {
         const container = document.getElementById('selectedPartsContainer');
