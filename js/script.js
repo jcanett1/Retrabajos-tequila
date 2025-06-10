@@ -8,19 +8,21 @@ document.addEventListener('DOMContentLoaded', async function () {
   let selectedPartes = [];
 
   // ✅ Inicialización de Flatpickr
-  flatpickr("#fechaCreacion", {
-    locale: "es",
-    dateFormat: "d/m/Y",
-    allowInput: true,
-    defaultDate: new Date()
-  });
+ const esLocale = flatpickr.l10ns.es || flatpickr.l10ns.default;
 
-  flatpickr("#filtroFecha", {
-    locale: "es",
-    mode: "range",
-    dateFormat: "d/m/Y",
-    allowInput: true
-  });
+flatpickr("#fechaCreacion", {
+  locale: esLocale,
+  dateFormat: "d/m/Y",
+  allowInput: true,
+  defaultDate: new Date()
+});
+
+flatpickr("#filtroFecha", {
+  locale: esLocale,
+  mode: "range",
+  dateFormat: "d/m/Y",
+  allowInput: true
+});
 
   // ✅ Cargar partes desde JSON
   async function loadPartes() {
