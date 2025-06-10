@@ -535,19 +535,17 @@ function filterData() {
   if (error) {
     console.error("Error al cargar datos:", error);
     document.querySelector('#retrabajosTable tbody').innerHTML = `
-      <tr><td colspan="7" class="text-center">Error al cargar los datos</td></tr>
-    `;
+      <tr><td colspan="7" class="text-center">Error al cargar los datos</td></tr>`;
     return;
   }
-       
-  rawData = data; // Guarda todos los datos
-  const filteredData = filterData(); // Aplica filtros personalizados
-       
+
   const tbody = document.querySelector('#retrabajosTable tbody');
-  if (data.length === 0) {
+  const filteredData = filterData(data); // ✅ Aquí usamos filterData()
+
+  if (filteredData.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" class="text-center">No hay datos</td></tr>`;
   } else {
-    tbody.innerHTML = data.map(item => `
+    tbody.innerHTML = filteredData.map(item => `
       <tr>
         <td>${item.fecha}</td>
         <td>${item.orden}</td>
@@ -578,6 +576,8 @@ function filterData() {
       });
 
       // ✅ Eventos iniciales
+      document.getElementById('filtroCelda').addEventListener('change', updateTable);
+      document.getElementById('filtroFecha').addEventListener('input', updateTable);
       document.getElementById('seleccionarParteBtn').addEventListener('click', loadPartes);
       document.getElementById('confirmarSeleccionBtn').addEventListener('click', function () {
         const selectedCheckboxes = document.querySelectorAll('.parte-checkbox:checked');
