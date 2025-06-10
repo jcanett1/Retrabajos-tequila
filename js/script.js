@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function loadPartes() {
     const container = document.getElementById('partesListContainer');
     try {
-      const res = await fetch("data/partesid.json");
+      const res = await fetch("partesid.json");
       if (!res.ok) throw new Error("No se pudo cargar el archivo JSON");
 
       const partes = await res.json();
