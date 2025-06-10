@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"> 
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"> 
+
   <style id="app-style">
     :root {
       --primary-color: #0056b3;
@@ -67,9 +68,6 @@
       background-color: #218838;
       border-color: #218838;
     }
-    .table-container {
-      overflow-x: auto;
-    }
     .table th {
       background-color: #e9ecef;
       color: #495057;
@@ -77,20 +75,6 @@
     }
     .export-buttons {
       margin-bottom: 15px;
-    }
-    .loading-spinner {
-      display: inline-block;
-      width: 1.5rem;
-      height: 1.5rem;
-      border: 0.25em solid rgba(0, 0, 0, 0.1);
-      border-right-color: var(--primary-color);
-      border-radius: 50%;
-      animation: spinner 1s linear infinite;
-    }
-    @keyframes spinner {
-      to {
-        transform: rotate(360deg);
-      }
     }
     .required-field::after {
       content: '*';
@@ -131,9 +115,6 @@
     .selected-part-badge .remove-part {
       margin-left: 5px;
       cursor: pointer;
-    }
-    .flatpickr-input {
-      background-color: white !important;
     }
     @media (max-width: 768px) {
       .card-body {
@@ -177,6 +158,7 @@
               <div class="invalid-feedback">Por favor seleccione un tipo de defecto.</div>
             </div>
           </div>
+
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="celda" class="form-label required-field">Celda</label>
@@ -213,6 +195,7 @@
               <div class="invalid-feedback">Por favor seleccione al menos una parte.</div>
             </div>
           </div>
+
           <div class="row">
             <div class="col-md-4 mb-3">
               <label for="cantidad" class="form-label required-field">Cantidad</label>
@@ -287,32 +270,33 @@
       </div>
     </div>
 
-    <!-- Modal para seleccionar partes -->
-<div class="modal fade" id="partesModal" tabindex="-1" aria-labelledby="partesModalLabel">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="partesModalLabel">Seleccionar Partes</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <input type="text" class="form-control" id="buscarParteInput" placeholder="Buscar parte por ID o descripción">
-        </div>
-        <div id="partesListContainer">
-          <div class="text-center py-4">
-            <div class="loading-spinner"></div>
-            <p class="mt-2">Cargando partes disponibles...</p>
+    <!-- Modal de partes -->
+    <div class="modal fade" id="partesModal" tabindex="-1" aria-labelledby="partesModalLabel">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="partesModalLabel">Seleccionar Partes</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <input type="text" class="form-control" id="buscarParteInput" placeholder="Buscar parte por ID o descripción">
+            </div>
+            <div id="partesListContainer">
+              <div class="text-center py-4">
+                <div class="loading-spinner"></div>
+                <p class="mt-2">Cargando partes disponibles...</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="confirmarSeleccionBtn">Confirmar Selección</button>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="confirmarSeleccionBtn">Confirmar Selección</button>
-      </div>
     </div>
   </div>
-</div>
 
   <!-- Librerías -->
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script> 
@@ -327,11 +311,12 @@
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> 
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script> 
 
+  <!-- Script principal -->
   <script id="app-script">
     document.addEventListener('DOMContentLoaded', async function () {
       // ✅ Configuración de Supabase
-      const supabaseUrl = 'https://hckbtzbcmijdstyazwoz.supabase.co'; // Reemplaza con tu URL real
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhja2J0emJjbWlqZHN0eWF6d296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1MDU4MDcsImV4cCI6MjA2NTA4MTgwN30.JfYJwuytLNXY42QcfjdilP4btvKu17gr84dbUQ_nMBk';     // Reemplaza con tu Anon Key
+      const supabaseUrl = 'https://hckbtzbcmijdstyazwoz.supabase.co';  // Reemplaza con tu URL real
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhja2J0emJjbWlqZHN0eWF6d296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1MDU4MDcsImV4cCI6MjA2NTA4MTgwN30.JfYJwuytLNXY42QcfjdilP4btvKu17gr84dbUQ_nMBk';
       const { createClient } = supabase;
       const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
@@ -342,7 +327,6 @@
         allowInput: true,
         defaultDate: new Date()
       });
-
       flatpickr("#filtroFecha", {
         locale: "es",
         mode: "range",
@@ -355,7 +339,7 @@
       let partes = [];
       let selectedPartes = [];
 
-      // ✅ Datos simulados (opcional)
+      // ✅ Datos simulados
       async function fetchMockData() {
         return {
           success: true,
@@ -416,33 +400,29 @@
       }
 
       // ✅ Actualizar visualización de partes seleccionadas
-  function updateSelectedPartesDisplay() {
-  const container = document.getElementById('selectedPartsContainer');
-  const parteRecibidaInput = document.getElementById('parteRecibidaId');
+      function updateSelectedPartesDisplay() {
+        const container = document.getElementById('selectedPartsContainer');
+        const input = document.getElementById('parteRecibidaId');
 
-  if (selectedPartes.length > 0) {
-    parteRecibidaInput.value = selectedPartes.join(', ');
-    parteRecibidaInput.classList.remove('is-invalid');
-    
-    container.innerHTML = selectedPartes.map(id => `
-      <span class="selected-part-badge">
-        ${id}
-        <i class="fas fa-times remove-part" data-id="${id}"></i>
-      </span>`).join('');
-    
-    // Vuelve a asignar eventos a los botones de eliminar
-    document.querySelectorAll('.remove-part').forEach(btn => {
-      btn.addEventListener('click', e => {
-        selectedPartes = selectedPartes.filter(id => id !== e.target.dataset.id);
-        updateSelectedPartesDisplay();
-      });
-    });
-
-  } else {
-    parteRecibidaInput.value = '';
-    container.innerHTML = '';
-  }
-}
+        if (selectedPartes.length > 0) {
+          input.value = selectedPartes.join(', ');
+          input.classList.remove('is-invalid');
+          container.innerHTML = selectedPartes.map(id => `
+            <span class="selected-part-badge">
+              ${id}
+              <i class="fas fa-times remove-part" data-id="${id}"></i>
+            </span>`).join('');
+          document.querySelectorAll('.remove-part').forEach(btn => {
+            btn.addEventListener('click', e => {
+              selectedPartes = selectedPartes.filter(id => id !== e.target.dataset.id);
+              updateSelectedPartesDisplay();
+            });
+          });
+        } else {
+          input.value = '';
+          container.innerHTML = '';
+        }
+      }
 
       // ✅ Validar formulario
       function validateForm() {
@@ -520,7 +500,7 @@
         Swal.fire({ icon: 'success', title: 'Guardado', timer: 2000, showConfirmButton: false });
       });
 
-      // ✅ Actualizar tabla desde Supabase
+      // ✅ Cargar tabla desde Supabase
       async function updateTable() {
         const { data, error } = await supabaseClient.from('retrabajos').select();
         if (error) console.error("Error cargando datos:", error);
@@ -538,7 +518,8 @@
               <td>${item.codigoDefecto}</td>
               <td>${item.parteId}</td>
               <td>${item.cantidad}</td>
-            </tr>`).join('');
+            </tr>`
+          ).join('');
       }
 
       // ✅ Botones de exportación
@@ -559,19 +540,23 @@
 
       // ✅ Eventos iniciales
       document.getElementById('seleccionarParteBtn').addEventListener('click', loadPartes);
+      document.getElementById('confirmarSeleccionBtn').addEventListener('click', function () {
+        const selectedCheckboxes = document.querySelectorAll('.parte-checkbox:checked');
+        selectedPartes = Array.from(selectedCheckboxes).map(cb => cb.value);
+        updateSelectedPartesDisplay();
+
+        const modalElement = document.getElementById('partesModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) modalInstance.hide();
+      });
+
       document.getElementById('limpiarFormularioBtn').addEventListener('click', resetForm);
 
-      document.getElementById('confirmarSeleccionBtn').addEventListener('click', function () {
-  const selectedCheckboxes = document.querySelectorAll('.parte-checkbox:checked');
-  selectedPartes = Array.from(selectedCheckboxes).map(cb => cb.value);
-  updateSelectedPartesDisplay();
-
-  // Cierra el modal
-  const modalElement = document.getElementById('partesModal');
-  const modalInstance = bootstrap.Modal.getInstance(modalElement);
-  if (modalInstance) {
-    modalInstance.hide();
-  }
+      // ✅ Cerrar modal limpiamente
+      document.getElementById('partesModal').addEventListener('hidden.bs.modal', function () {
+        const confirmarBtn = document.getElementById('confirmarSeleccionBtn');
+        if (confirmarBtn) confirmarBtn.blur();
+      });
 
       // ✅ Carga inicial
       updateTable();
