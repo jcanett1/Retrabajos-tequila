@@ -308,7 +308,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="confirmarSeleccionBtn" data-bs-dismiss="modal">Confirmar Selección</button>
+        <button type="button" class="btn btn-primary" id="confirmarSeleccionBtn">Confirmar Selección</button>
       </div>
     </div>
   </div>
@@ -416,29 +416,33 @@
       }
 
       // ✅ Actualizar visualización de partes seleccionadas
-      function updateSelectedPartesDisplay() {
-        const container = document.getElementById('selectedPartsContainer');
-        const input = document.getElementById('parteRecibidaId');
+  function updateSelectedPartesDisplay() {
+  const container = document.getElementById('selectedPartsContainer');
+  const parteRecibidaInput = document.getElementById('parteRecibidaId');
 
-        if (selectedPartes.length > 0) {
-          input.value = selectedPartes.join(', ');
-          input.classList.remove('is-invalid');
-          container.innerHTML = selectedPartes.map(id => `
-            <span class="selected-part-badge">
-              ${id}
-              <i class="fas fa-times remove-part" data-id="${id}"></i>
-            </span>`).join('');
-          document.querySelectorAll('.remove-part').forEach(btn => {
-            btn.addEventListener('click', e => {
-              selectedPartes = selectedPartes.filter(id => id !== e.target.dataset.id);
-              updateSelectedPartesDisplay();
-            });
-          });
-        } else {
-          input.value = '';
-          container.innerHTML = '';
-        }
-      }
+  if (selectedPartes.length > 0) {
+    parteRecibidaInput.value = selectedPartes.join(', ');
+    parteRecibidaInput.classList.remove('is-invalid');
+    
+    container.innerHTML = selectedPartes.map(id => `
+      <span class="selected-part-badge">
+        ${id}
+        <i class="fas fa-times remove-part" data-id="${id}"></i>
+      </span>`).join('');
+    
+    // Vuelve a asignar eventos a los botones de eliminar
+    document.querySelectorAll('.remove-part').forEach(btn => {
+      btn.addEventListener('click', e => {
+        selectedPartes = selectedPartes.filter(id => id !== e.target.dataset.id);
+        updateSelectedPartesDisplay();
+      });
+    });
+
+  } else {
+    parteRecibidaInput.value = '';
+    container.innerHTML = '';
+  }
+}
 
       // ✅ Validar formulario
       function validateForm() {
@@ -555,13 +559,19 @@
 
       // ✅ Eventos iniciales
       document.getElementById('seleccionarParteBtn').addEventListener('click', loadPartes);
-      document.getElementById('confirmarSeleccionBtn').addEventListener('click', updateSelectedPartesDisplay);
       document.getElementById('limpiarFormularioBtn').addEventListener('click', resetForm);
 
-      document.getElementById('partesModal').addEventListener('hidden.bs.modal', function () {
-  const confirmarBtn = document.getElementById('confirmarSeleccionBtn');
-  if (confirmarBtn) confirmarBtn.blur();
-});
+      document.getElementById('confirmarSeleccionBtn').addEventListener('click', function () {
+  const selectedCheckboxes = document.querySelectorAll('.parte-checkbox:checked');
+  selectedPartes = Array.from(selectedCheckboxes).map(cb => cb.value);
+  updateSelectedPartesDisplay();
+
+  // Cierra el modal
+  const modalElement = document.getElementById('partesModal');
+  const modalInstance = bootstrap.Modal.getInstance(modalElement);
+  if (modalInstance) {
+    modalInstance.hide();
+  }
 
       // ✅ Carga inicial
       updateTable();
