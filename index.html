@@ -307,68 +307,75 @@
         allowInput: true
       });
 
-      let selectedPartes = [];
+     <script>
+let selectedPartes = [];
 
-      // ✅ Filtrar partes en el modal
-      function filterPartes() {
-        const text = document.getElementById('buscarParteInput').value.toLowerCase();
-        document.querySelectorAll('.list-group-item').forEach(item => {
-          item.style.display = item.textContent.toLowerCase().includes(text) ? '' : 'none';
-        });
-      }
+// Cargar partes desde el archivo JSON
+async function loadPartes() {
+  const container = document.getElementById('partesListContainer');
+  try {
+    const res = await fetch("data/partesid.json");
+    const partes = await res.json();
 
-      // ✅ Cargar partes en el modal
-      async function loadPartes() {
-        const container = document.getElementById('partesListContainer');
-        try {
-          const response = await fetchMockData();
-          if (response.success) {
-            const partes = response.data;
-            const html = `
-              <div class="list-group">
-                ${partes.map(parte => `
-                  <div class="list-group-item">
-                    <div class="form-check">
-                      <input class="form-check-input parte-checkbox" type="checkbox" value="${parte.id}" id="parte-${parte.id}">
-                      <label class="form-check-label" for="parte-${parte.id}">
-                        <strong>${parte.id}</strong> - ${parte.description}
-                      </label>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>`;
-            container.innerHTML = html;
+    // Generar HTML de partes
+    const html = partes.map(parte => `
+      <div class="list-group-item parte-item" data-id="${parte.id}" data-desc="${parte.description}">
+        <strong>${parte.id}</strong> - ${parte.description}
+      </div>
+    `).join('');
 
-            selectedPartes.forEach(id => {
-              const checkbox = document.getElementById(`parte-${id}`);
-              if (checkbox) checkbox.checked = true;
-            });
+    container.innerHTML = html;
 
-            document.getElementById('buscarParteInput').addEventListener('input', filterPartes);
-          } else {
-            container.innerHTML = '<div class="alert alert-danger">Error al cargar las partes</div>';
-          }
-        } catch (err) {
-          container.innerHTML = '<div class="alert alert-danger">Error de conexión</div>';
-        }
-      }
+    // Manejar clics en partes
+    document.querySelectorAll('.parte-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const id = item.getAttribute('data-id');
+        selectedPartes = [id]; // Solo se permite una parte
+        updateSelectedPartesDisplay();
+        bootstrap.Modal.getInstance(document.getElementById('partesModal')).hide();
+      });
+    });
 
-      // ✅ Datos simulados
-      function fetchMockData() {
-        return Promise.resolve({
-          success: true,
-          data: [
-            { id: 'P001', description: 'Pieza de motor A101' },
-            { id: 'P002', description: 'Eje de transmisión B202' },
-            { id: 'P003', description: 'Componente hidráulico C303' },
-            { id: 'P004', description: 'Elemento estructural D404' },
-            { id: 'P005', description: 'Componente eléctrico E505' },
-            { id: 'P006', description: 'Pieza de freno F606' },
-            { id: 'P007', description: 'Elemento de suspensión G707' }
-          ]
-        });
-      }
+    // Buscador
+    document.getElementById('buscarParteInput').addEventListener('input', e => {
+      const text = e.target.value.toLowerCase();
+      document.querySelectorAll('.parte-item').forEach(item => {
+        const content = item.textContent.toLowerCase();
+        item.style.display = content.includes(text) ? '' : 'none';
+      });
+    });
 
+  } catch (err) {
+    console.error("Error al cargar las partes:", err);
+    container.innerHTML = '<div class="alert alert-danger">No se pudieron cargar las partes</div>';
+  }
+}
+
+// Mostrar parte seleccionada
+function updateSelectedPartesDisplay() {
+  const input = document.getElementById('parteRecibidaId');
+  const container = document.getElementById('selectedPartsContainer');
+
+  if (selectedPartes.length > 0) {
+    const id = selectedPartes[0];
+    input.value = id;
+    container.innerHTML = `<span class="badge bg-primary">${id}</span>`;
+  } else {
+    input.value = '';
+    container.innerHTML = '';
+  }
+}
+
+// Eventos iniciales
+document.getElementById('seleccionarParteBtn').addEventListener('click', loadPartes);
+document.getElementById('confirmarSeleccionBtn').addEventListener('click', () => {
+  if (selectedPartes.length === 0) {
+    alert("Por favor selecciona una parte.");
+    return;
+  }
+  updateSelectedPartesDisplay();
+});
+</script>
       // ✅ Actualizar visualización de partes seleccionadas
       function updateSelectedPartesDisplay() {
         const container = document.getElementById('selectedPartsContainer');
