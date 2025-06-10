@@ -531,8 +531,8 @@
         const cantidad = document.getElementById('cantidad').value;
         
         // Para cada parte seleccionada, crear un registro
-for (const parteId of selectedPartes) {
-  const nuevoRetrabajo = {
+  for (const parteId of selectedPartes) {
+    const nuevoRetrabajo = {
     fecha: fechaCreacion,
     orden: numeroOrden,
     tipoDefecto: tipoDefecto,
@@ -542,13 +542,13 @@ for (const parteId of selectedPartes) {
     cantidad: parseInt(cantidad)
   };
 
-  console.log("Guardando:", nuevoRetrabajo); // Para debug
+    console.log("Guardando:", nuevoRetrabajo); // Para debug
 
-  const { error } = await supabaseClient
+    const { error } = await supabaseClient
     .from('retrabajos')
     .insert([nuevoRetrabajo]);
 
-  if (error) {
+    if (error) {
     console.error("Error al guardar en Supabase:", error);
     Swal.fire({
       icon: 'error',
