@@ -287,28 +287,32 @@
       </div>
     </div>
 
-    <!-- Modal de partes -->
-    <div class="modal fade" id="partesModal" tabindex="-1" aria-labelledby="partesModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="partesModalLabel">Seleccionar Partes</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <input type="text" class="form-control" id="buscarParteInput" placeholder="Buscar parte por ID o descripción">
-            </div>
-            <div id="partesListContainer"></div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-primary" id="confirmarSeleccionBtn" data-bs-dismiss="modal">Confirmar Selección</button>
+    <!-- Modal para seleccionar partes -->
+<div class="modal fade" id="partesModal" tabindex="-1" aria-labelledby="partesModalLabel">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="partesModalLabel">Seleccionar Partes</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <input type="text" class="form-control" id="buscarParteInput" placeholder="Buscar parte por ID o descripción">
+        </div>
+        <div id="partesListContainer">
+          <div class="text-center py-4">
+            <div class="loading-spinner"></div>
+            <p class="mt-2">Cargando partes disponibles...</p>
           </div>
         </div>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmarSeleccionBtn" data-bs-dismiss="modal">Confirmar Selección</button>
+      </div>
     </div>
   </div>
+</div>
 
   <!-- Librerías -->
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script> 
@@ -553,6 +557,11 @@
       document.getElementById('seleccionarParteBtn').addEventListener('click', loadPartes);
       document.getElementById('confirmarSeleccionBtn').addEventListener('click', updateSelectedPartesDisplay);
       document.getElementById('limpiarFormularioBtn').addEventListener('click', resetForm);
+
+      document.getElementById('partesModal').addEventListener('hidden.bs.modal', function () {
+  const confirmarBtn = document.getElementById('confirmarSeleccionBtn');
+  if (confirmarBtn) confirmarBtn.blur();
+});
 
       // ✅ Carga inicial
       updateTable();
