@@ -43,45 +43,38 @@ async function loadPartes() {
     const partes = await res.json();
     console.log("JSON cargado correctamente:", partes);
     
-    
-    // Resto de tu código para procesar las partes...
+    // Generar HTML con las partes
+    const html = partes.map(parte => `
+      <div class="list-group-item">
+        <div class="form-check">
+          <input class="form-check-input parte-checkbox" type="checkbox" value="${parte.id}" id="parte-${parte.id}">
+          <label class="form-check-label" for="parte-${parte.id}">
+            <strong>${parte.id}</strong> - ${parte.description}
+          </label>
+        </div>
+      </div>
+    `).join('');
+
+    container.innerHTML = html;
+
+    // Restablecer checkboxes seleccionados previamente
+    selectedPartes.forEach(id => {
+      const checkbox = document.querySelector(`input[value="${id}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+
+    // Filtro en tiempo real
+    document.getElementById('buscarParteInput').addEventListener('input', filterPartes);
     
   } catch (err) {
     console.error("Error fatal al cargar partes:", err);
     container.innerHTML = `
       <div class="alert alert-danger">
         Error al cargar partes: ${err.message}
-        <br>Ruta intentada: ${jsonPath}
+        <br>Ruta intentada: ../partesid.json
       </div>`;
   }
 }
-      const html = partes.map(parte => `
-        <div class="list-group-item">
-          <div class="form-check">
-            <input class="form-check-input parte-checkbox" type="checkbox" value="${parte.id}" id="parte-${parte.id}">
-            <label class="form-check-label" for="parte-${parte.id}">
-              <strong>${parte.id}</strong> - ${parte.description}
-            </label>
-          </div>
-        </div>
-      `).join('');
-
-      container.innerHTML = html;
-
-      // Restablecer checkboxes seleccionados previamente
-      selectedPartes.forEach(id => {
-        const checkbox = document.querySelector(`input[value="${id}"]`);
-        if (checkbox) checkbox.checked = true;
-      });
-
-      // Filtro en tiempo real
-      document.getElementById('buscarParteInput').addEventListener('input', filterPartes);
-
-    } catch (err) {
-      console.error("Error al cargar las partes:", err);
-      container.innerHTML = '<div class="alert alert-danger">No se pudieron cargar las partes</div>';
-    }
-  }
 
   // ✅ Filtrar partes en el modal
   function filterPartes() {
