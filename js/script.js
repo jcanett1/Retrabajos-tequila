@@ -25,7 +25,7 @@ flatpickr("#filtroFecha", {
 });
 
   // ✅ Cargar partes desde JSON
-  async function loadPartes() {
+async function loadPartes() {
   const container = document.getElementById('partesListContainer');
   try {
     // Prueba con esta ruta primero
@@ -42,6 +42,7 @@ flatpickr("#filtroFecha", {
     
     const partes = await res.json();
     console.log("JSON cargado correctamente:", partes);
+    
     
     // Resto de tu código para procesar las partes...
     
