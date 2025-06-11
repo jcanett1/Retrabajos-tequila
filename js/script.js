@@ -28,50 +28,63 @@ flatpickr("#filtroFecha", {
 async function loadPartes() {
   const container = document.getElementById('partesListContainer');
   try {
-    // Prueba con esta ruta primero
-    const jsonPath = "/partesid.json";
+    // 1. Definir la ruta CORRECTA según tu estructura
+    const jsonPath = "partesid.json"; // Ahora está en la misma carpeta que el HTML
+    
+    // 2. Verificar disponibilidad del archivo
     console.log("Intentando cargar JSON desde:", jsonPath);
+    const response = await fetch(jsonPath);
     
-    const res = await fetch(jsonPath);
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Error en la respuesta:", res.status, errorText);
-      throw new Error(`Error HTTP ${res.status}: ${errorText}`);
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      throw new Error(`Error HTTP ${response.status}: ${errorDetails}`);
     }
     
-    const partes = await res.json();
-    console.log("JSON cargado correctamente:", partes);
+    // 3. Parsear y validar el contenido
+    const partes = await response.json();
+    console.log("Datos recibidos:", partes);
     
-    // Generar HTML con las partes
-    const html = partes.map(parte => `
-      <div class="list-group-item">
-        <div class="form-check">
-          <input class="form-check-input parte-checkbox" type="checkbox" value="${parte.id}" id="parte-${parte.id}">
-          <label class="form-check-label" for="parte-${parte.id}">
-            <strong>${parte.id}</strong> - ${parte.description}
-          </label>
+    if (!Array.isArray(partes)) {
+      throw new Error("El formato del JSON no es válido. Se esperaba un array.");
+    }
+    
+    // 4. Generar la interfaz de usuario
+    const html = partes.map(parte => {
+      if (!parte.id || !parte.description) {
+        console.warn("Parte con formato incorrecto:", parte);
+        return '';
+      }
+      return `
+        <div class="list-group-item">
+          <div class="form-check">
+            <input class="form-check-input parte-checkbox" type="checkbox" 
+                   value="${parte.id}" id="parte-${parte.id}">
+            <label class="form-check-label" for="parte-${parte.id}">
+              <strong>${parte.id}</strong> - ${parte.description}
+            </label>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
-    container.innerHTML = html;
+    container.innerHTML = html || '<div class="alert alert-warning">No hay partes disponibles</div>';
 
-    // Restablecer checkboxes seleccionados previamente
+    // Restaurar selecciones previas
     selectedPartes.forEach(id => {
       const checkbox = document.querySelector(`input[value="${id}"]`);
       if (checkbox) checkbox.checked = true;
     });
 
-    // Filtro en tiempo real
+    // Configurar filtro en tiempo real
     document.getElementById('buscarParteInput').addEventListener('input', filterPartes);
-    
-  } catch (err) {
-    console.error("Error fatal al cargar partes:", err);
+
+  } catch (error) {
+    console.error("Error al cargar partes:", error);
     container.innerHTML = `
       <div class="alert alert-danger">
-        Error al cargar partes: ${err.message}
-        <br>Ruta intentada: ../partesid.json
+        <strong>Error al cargar las partes</strong><br>
+        ${error.message}<br>
+        <small>Verifique la consola para más detalles</small>
       </div>`;
   }
 }
