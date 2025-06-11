@@ -29,7 +29,7 @@ async function loadPartes() {
   const container = document.getElementById('partesListContainer');
   try {
     // Prueba con esta ruta primero
-    const jsonPath = "./partesid.json";
+    const jsonPath = "/partesid.json";
     console.log("Intentando cargar JSON desde:", jsonPath);
     
     const res = await fetch(jsonPath);
