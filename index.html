@@ -170,6 +170,34 @@
       <button class="btn btn-danger" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Exportar a PDF</button>
     </div>
 
+
+    <!-- Filtros -->
+<div class="card filter-section">
+  <div class="card-body">
+    <div class="row">
+      <!-- Filtro de Fecha -->
+      <div class="col-md-6 mb-3 mb-md-0">
+        <label for="filtroFecha" class="form-label">Filtrar por Fecha</label>
+        <input type="text" class="form-control" id="filtroFecha" placeholder="Seleccionar rango de fechas">
+      </div>
+
+      <!-- Filtro de Celda -->
+      <div class="col-md-6">
+        <label for="filtroCelda" class="form-label">Filtrar por Celda</label>
+        <select class="form-select" id="filtroCelda">
+          <option value="todas" selected>Todas</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="15">15</option>
+          <option value="16">16</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    
     <!-- Tabla de retrabajos -->
     <div class="card">
       <div class="card-header bg-primary text-white">Listado de Retrabajos</div>
