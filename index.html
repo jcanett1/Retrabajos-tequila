@@ -111,6 +111,7 @@
         <select class="form-select" id="tipoDefecto" required>
           <option value="">Seleccionar tipo</option>
           <option value="orden cancelada">Orden Cancelada</option>
+           <option value="mal kiteado">Mal Kiteado</option>
           <option value="defecto de proceso">Defecto de Proceso</option>
           <option value="defecto de proveedor">Defecto de Proveedor</option>
         </select>
@@ -130,17 +131,29 @@
       </div>
 
       <div class="col-md-4 mb-3">
-        <label for="codigoDefecto" class="form-label required-field">Código de Defecto</label>
-        <select class="form-select" id="codigoDefecto" required>
-          <option value="">Seleccionar código</option>
-          <option value="shaft rayado/dañado">Shaft Rayado/Dañado</option>
-          <option value="defecto en pieza">Defecto en Pieza</option>
-          <option value="falta de material">Falta de Material</option>
-          <option value="error de montaje">Error de Montaje</option>
-          <option value="probelma de calibracion">Problema de Calibración</option>
-        </select>
-        <div class="invalid-feedback">Por favor seleccione un código de defecto.</div>
-      </div>
+  <label for="codigoDefecto" class="form-label required-field">Código de Defecto</label>
+  <select class="form-select" id="codigoDefecto" required>
+    <option value="">Seleccionar código</option>
+    <option value="shaft rayado/dañado">Shaft Rayado/Dañado</option>
+    <option value="defecto en pieza">Defecto en Pieza</option>
+    <option value="falta de material">Falta de Material</option>
+    <option value="error de montaje">Error de Montaje</option>
+    <option value="probelma de calibracion">Problema de Calibración</option>
+    <option value="mal corte">MAL CORTE</option>
+    <option value="mal desvaste">MAL DESVASTE</option>
+    <option value="logo dañado">LOGO DAÑADO</option>
+    <option value="golpeado">GOLPEADO</option>
+    <option value="manchado">MANCHADO</option>
+    <option value="mal diametro">MAL DIAMETRO</option>
+    <option value="dañado por re trabajo">DAÑADO POR RETRABAJO</option>
+    <option value="etiqueta dañada">ETIQUETA DAÑADA</option>
+    <option value="rayado especificar">RAYADO (ESPECIFICAR)</option>
+    <option value="despintado">DESPINTADO</option>
+    <option value="poroso">POROSO</option>
+    <option value="quebrado">QUEBRADO</option>
+  </select>
+  <div class="invalid-feedback">Por favor seleccione un código de defecto.</div>
+</div>
 
       <div class="col-md-4 mb-3">
         <label for="parteRecibidaId" class="form-label required-field">Parte Recibida ID</label>
