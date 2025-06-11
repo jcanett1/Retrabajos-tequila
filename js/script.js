@@ -26,13 +26,34 @@ flatpickr("#filtroFecha", {
 
   // ✅ Cargar partes desde JSON
   async function loadPartes() {
-    const container = document.getElementById('partesListContainer');
-    try {
-      const res = await fetch("/partesid.json");
-      if (!res.ok) throw new Error("No se pudo cargar el archivo JSON");
-
-      const partes = await res.json();
-
+  const container = document.getElementById('partesListContainer');
+  try {
+    // Prueba con esta ruta primero
+    const jsonPath = "../partesid.json";
+    console.log("Intentando cargar JSON desde:", jsonPath);
+    
+    const res = await fetch(jsonPath);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Error en la respuesta:", res.status, errorText);
+      throw new Error(`Error HTTP ${res.status}: ${errorText}`);
+    }
+    
+    const partes = await res.json();
+    console.log("JSON cargado correctamente:", partes);
+    
+    // Resto de tu código para procesar las partes...
+    
+  } catch (err) {
+    console.error("Error fatal al cargar partes:", err);
+    container.innerHTML = `
+      <div class="alert alert-danger">
+        Error al cargar partes: ${err.message}
+        <br>Ruta intentada: ${jsonPath}
+      </div>`;
+  }
+}
       const html = partes.map(parte => `
         <div class="list-group-item">
           <div class="form-check">
