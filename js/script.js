@@ -238,9 +238,9 @@ async function loadPartes() {
     const orden = document.getElementById('numeroOrden').value;
     const tipoDefecto = document.getElementById('tipoDefecto').value;
     const celda = document.getElementById('celda').value;
-    const nombreoperador = document.getElementById('nombreoperador').value;
     const codigoDefecto = document.getElementById('codigoDefecto').value;
     const cantidad = parseInt(document.getElementById('cantidad').value);
+    const nombreoperador = document.getElementById('nombreoperador').value;
 
     for (const parteId of selectedPartes) {
       const nuevoRetrabajo = {
