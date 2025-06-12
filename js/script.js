@@ -192,10 +192,10 @@ async function loadPartes() {
           <td>${item.orden}</td>
           <td>${item.tipoDefecto}</td>
           <td>${item.celda}</td>
-           <td>${item.nombreoperador}</td>
           <td>${item.codigoDefecto}</td>
           <td>${item.parteId}</td>
           <td>${item.cantidad}</td>
+          <td>${item.nombreoperador}</td>
         </tr>
       `).join('');
     }
@@ -248,10 +248,10 @@ async function loadPartes() {
         orden,
         tipoDefecto,
         celda,
-        nombreoperador,
         codigoDefecto,
         parteId,
-        cantidad
+        cantidad,
+        nombreoperador
       };
 
       const { error } = await supabaseClient.from('retrabajos').insert([nuevoRetrabajo]);
