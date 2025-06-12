@@ -192,6 +192,7 @@ async function loadPartes() {
           <td>${item.orden}</td>
           <td>${item.tipoDefecto}</td>
           <td>${item.celda}</td>
+           <td>${item.nombreoperador}</td>
           <td>${item.codigoDefecto}</td>
           <td>${item.parteId}</td>
           <td>${item.cantidad}</td>
@@ -237,6 +238,7 @@ async function loadPartes() {
     const orden = document.getElementById('numeroOrden').value;
     const tipoDefecto = document.getElementById('tipoDefecto').value;
     const celda = document.getElementById('celda').value;
+    const nombreoperador = document.getElementById('nombreoperador').value;
     const codigoDefecto = document.getElementById('codigoDefecto').value;
     const cantidad = parseInt(document.getElementById('cantidad').value);
 
@@ -246,6 +248,7 @@ async function loadPartes() {
         orden,
         tipoDefecto,
         celda,
+        nombreoperador,
         codigoDefecto,
         parteId,
         cantidad
@@ -273,7 +276,7 @@ async function loadPartes() {
 
   document.getElementById('exportPdfBtn').addEventListener('click', function () {
     const doc = new jspdf.jsPDF();
-    const head = [['Fecha', 'Orden', 'Tipo Defecto', 'Celda', 'Código', 'Parte', 'Cantidad']];
+    const head = [['Fecha', 'Orden', 'Tipo Defecto', 'Celda', 'nombre del operador', 'Código', 'Parte', 'Cantidad']];
     const body = Array.from(document.querySelectorAll('#retrabajosTable tbody tr')).map(row => {
       return Array.from(row.children).map(cell => cell.innerText);
     });
