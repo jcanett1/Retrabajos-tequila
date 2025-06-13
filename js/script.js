@@ -23,7 +23,11 @@ flatpickr("#filtroFecha", {
   dateFormat: "d/m/Y",
   allowInput: true
 });
-
+  
+function convertirFechaFormatoISO(fechaString) {
+  const [dia, mes, año] = fechaString.split('/');
+  return `${año}-${mes}-${dia}`;
+}
   // ✅ Cargar partes desde JSON
 async function loadPartes() {
   const container = document.getElementById('partesListContainer');
@@ -234,7 +238,8 @@ async function loadPartes() {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const fecha = document.getElementById('fechaCreacion').value;
+    const fechaInput = document.getElementById('fechaCreacion').value;
+    const fecha = convertirFechaFormatoISO(fechaInput); // Convierte a YYYY-MM-DD
     const orden = document.getElementById('numeroOrden').value;
     const tipoDefecto = document.getElementById('tipoDefecto').value;
     const celda = document.getElementById('celda').value;
