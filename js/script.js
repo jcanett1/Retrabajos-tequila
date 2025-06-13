@@ -239,8 +239,8 @@ async function loadPartes() {
     if (!validateForm()) return;
 
     
-    const fechaInput = document.getElementById('fechaCreacion').value;
-    const fecha = convertirFechaFormatoISO(fechaInput);
+    const fechaInput = document.getElementById('fechaCreacion').value; // ✅ Definimos la variable
+    const fecha = convertirFechaFormatoISO(fechaInput); // Ahora sí funciona
     const orden = document.getElementById('numeroOrden').value;
     const tipoDefecto = document.getElementById('tipoDefecto').value;
     const celda = document.getElementById('celda').value;
