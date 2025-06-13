@@ -239,7 +239,8 @@ async function loadPartes() {
     if (!validateForm()) return;
 
     
-    const fecha = convertirFechaFormatoISO(fechaInput); // Convierte a YYYY-MM-DD
+    const fechaInput = document.getElementById('fechaCreacion').value;
+    const fecha = convertirFechaFormatoISO(fechaInput);
     const orden = document.getElementById('numeroOrden').value;
     const tipoDefecto = document.getElementById('tipoDefecto').value;
     const celda = document.getElementById('celda').value;
