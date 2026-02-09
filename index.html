@@ -85,6 +85,65 @@
       margin-left: 5px;
       cursor: pointer;
     }
+
+    /* Estilos para pestañas */
+    .nav-tabs .nav-link {
+      color: #495057;
+      font-weight: 500;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    /* Estilos para paginación */
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .pagination-info {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    .pagination-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pagination-controls button {
+      padding: 8px 16px;
+      border: 1px solid #dee2e6;
+      background-color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pagination-controls button:hover:not(:disabled) {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .pagination-controls button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .page-number {
+      padding: 8px 12px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
   </style>
 </head>
 <body>
@@ -236,26 +295,124 @@
 
 
     
-    <!-- Tabla de retrabajos -->
+    <!-- Pestañas y Tabla de retrabajos -->
     <div class="card">
-      <div class="card-header bg-primary text-white">Listado de Retrabajos</div>
+      <div class="card-header bg-primary text-white">
+        <ul class="nav nav-tabs card-header-tabs" id="yearTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-todos" data-bs-toggle="tab" data-bs-target="#todos-tab" 
+                    type="button" role="tab" aria-controls="todos-tab" aria-selected="true" style="color: white;">
+              <i class="fas fa-list"></i> Todos los Retrabajos
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-2026" data-bs-toggle="tab" data-bs-target="#year2026-tab" 
+                    type="button" role="tab" aria-controls="year2026-tab" aria-selected="false" style="color: white;">
+              <i class="fas fa-calendar-alt"></i> Retrabajos 2026
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-anteriores" data-bs-toggle="tab" data-bs-target="#anteriores-tab" 
+                    type="button" role="tab" aria-controls="anteriores-tab" aria-selected="false" style="color: white;">
+              <i class="fas fa-history"></i> Años Anteriores
+            </button>
+          </li>
+        </ul>
+      </div>
       <div class="card-body">
-        <div class="table-responsive">
-          <table id="retrabajosTable" class="table table-striped table-hover">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Orden</th>
-                <th>Tipo Defecto</th>
-                <th>Celda</th>
-                <th>Código Defecto</th>
-                <th>Parte ID</th>
-                <th>Cantidad</th>
-                <th>Nombre del Operador</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+        <div class="tab-content" id="yearTabContent">
+          <!-- Tab: Todos -->
+          <div class="tab-pane fade show active" id="todos-tab" role="tabpanel" aria-labelledby="tab-todos">
+            <div class="table-responsive">
+              <table id="retrabajosTableTodos" class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Orden</th>
+                    <th>Tipo Defecto</th>
+                    <th>Celda</th>
+                    <th>Código Defecto</th>
+                    <th>Parte ID</th>
+                    <th>Cantidad</th>
+                    <th>Nombre del Operador</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="pagination-container" id="paginationTodos">
+              <div class="pagination-info">
+                Mostrando <span id="infoTodos">0</span>
+              </div>
+              <div class="pagination-controls">
+                <button id="prevTodos"><i class="fas fa-chevron-left"></i> Anterior</button>
+                <span class="page-number">Página <span id="currentPageTodos">1</span> de <span id="totalPagesTodos">1</span></span>
+                <button id="nextTodos">Siguiente <i class="fas fa-chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: 2026 -->
+          <div class="tab-pane fade" id="year2026-tab" role="tabpanel" aria-labelledby="tab-2026">
+            <div class="table-responsive">
+              <table id="retrabajosTable2026" class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Orden</th>
+                    <th>Tipo Defecto</th>
+                    <th>Celda</th>
+                    <th>Código Defecto</th>
+                    <th>Parte ID</th>
+                    <th>Cantidad</th>
+                    <th>Nombre del Operador</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="pagination-container" id="pagination2026">
+              <div class="pagination-info">
+                Mostrando <span id="info2026">0</span>
+              </div>
+              <div class="pagination-controls">
+                <button id="prev2026"><i class="fas fa-chevron-left"></i> Anterior</button>
+                <span class="page-number">Página <span id="currentPage2026">1</span> de <span id="totalPages2026">1</span></span>
+                <button id="next2026">Siguiente <i class="fas fa-chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Años Anteriores -->
+          <div class="tab-pane fade" id="anteriores-tab" role="tabpanel" aria-labelledby="tab-anteriores">
+            <div class="table-responsive">
+              <table id="retrabajosTableAnteriores" class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Orden</th>
+                    <th>Tipo Defecto</th>
+                    <th>Celda</th>
+                    <th>Código Defecto</th>
+                    <th>Parte ID</th>
+                    <th>Cantidad</th>
+                    <th>Nombre del Operador</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="pagination-container" id="paginationAnteriores">
+              <div class="pagination-info">
+                Mostrando <span id="infoAnteriores">0</span>
+              </div>
+              <div class="pagination-controls">
+                <button id="prevAnteriores"><i class="fas fa-chevron-left"></i> Anterior</button>
+                <span class="page-number">Página <span id="currentPageAnteriores">1</span> de <span id="totalPagesAnteriores">1</span></span>
+                <button id="nextAnteriores">Siguiente <i class="fas fa-chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
