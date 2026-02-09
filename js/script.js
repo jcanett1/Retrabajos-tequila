@@ -6,92 +6,110 @@ document.addEventListener('DOMContentLoaded', async function () {
   const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
   let selectedPartes = [];
+  
+  // Variables de paginación
+  const ITEMS_PER_PAGE = 25;
+  let paginationState = {
+    todos: { currentPage: 1, totalPages: 1, data: [] },
+    year2026: { currentPage: 1, totalPages: 1, data: [] },
+    anteriores: { currentPage: 1, totalPages: 1, data: [] }
+  };
 
   // ✅ Inicialización de Flatpickr
- const esLocale = flatpickr.l10ns.es || flatpickr.l10ns.default;
+  const esLocale = flatpickr.l10ns.es || flatpickr.l10ns.default;
 
-flatpickr("#fechaCreacion", {
-  locale: esLocale,
-  dateFormat: "d/m/Y",
-  allowInput: true,
-  defaultDate: new Date()
-});
+  flatpickr("#fechaCreacion", {
+    locale: esLocale,
+    dateFormat: "d/m/Y",
+    allowInput: true,
+    defaultDate: new Date()
+  });
 
-flatpickr("#filtroFecha", {
-  locale: esLocale,
-  mode: "range",
-  dateFormat: "d/m/Y",
-  allowInput: true
-});
+  flatpickr("#filtroFecha", {
+    locale: esLocale,
+    mode: "range",
+    dateFormat: "d/m/Y",
+    allowInput: true
+  });
   
-function convertirFechaFormatoISO(fechaString) {
-  const [dia, mes, año] = fechaString.split('/');
-  return `${año}-${mes}-${dia}`;
-}
-  // ✅ Cargar partes desde JSON
-async function loadPartes() {
-  const container = document.getElementById('partesListContainer');
-  try {
-    // 1. Definir la ruta CORRECTA según tu estructura
-    const jsonPath = "partesid.json"; // Ahora está en la misma carpeta que el HTML
-    
-    // 2. Verificar disponibilidad del archivo
-    console.log("Intentando cargar JSON desde:", jsonPath);
-    const response = await fetch(jsonPath);
-    
-    if (!response.ok) {
-      const errorDetails = await response.text();
-      throw new Error(`Error HTTP ${response.status}: ${errorDetails}`);
-    }
-    
-    // 3. Parsear y validar el contenido
-    const partes = await response.json();
-    console.log("Datos recibidos:", partes);
-    
-    if (!Array.isArray(partes)) {
-      throw new Error("El formato del JSON no es válido. Se esperaba un array.");
-    }
-    
-    // 4. Generar la interfaz de usuario
-    const html = partes.map(parte => {
-      if (!parte.id || !parte.description) {
-        console.warn("Parte con formato incorrecto:", parte);
-        return '';
-      }
-      return `
-        <div class="list-group-item">
-          <div class="form-check">
-            <input class="form-check-input parte-checkbox" type="checkbox" 
-                   value="${parte.id}" id="parte-${parte.id}">
-            <label class="form-check-label" for="parte-${parte.id}">
-              <strong>${parte.id}</strong> - ${parte.description}
-            </label>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    container.innerHTML = html || '<div class="alert alert-warning">No hay partes disponibles</div>';
-
-    // Restaurar selecciones previas
-    selectedPartes.forEach(id => {
-      const checkbox = document.querySelector(`input[value="${id}"]`);
-      if (checkbox) checkbox.checked = true;
-    });
-
-    // Configurar filtro en tiempo real
-    document.getElementById('buscarParteInput').addEventListener('input', filterPartes);
-
-  } catch (error) {
-    console.error("Error al cargar partes:", error);
-    container.innerHTML = `
-      <div class="alert alert-danger">
-        <strong>Error al cargar las partes</strong><br>
-        ${error.message}<br>
-        <small>Verifique la consola para más detalles</small>
-      </div>`;
+  function convertirFechaFormatoISO(fechaString) {
+    const [dia, mes, año] = fechaString.split('/');
+    return `${año}-${mes}-${dia}`;
   }
-}
+
+  // ✅ Función para obtener el año de una fecha en formato dd/mm/yyyy
+  function getYearFromDate(dateString) {
+    if (!dateString) return null;
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      return parseInt(parts[2]); // El año está en la tercera posición
+    }
+    // Si la fecha está en formato ISO (yyyy-mm-dd)
+    if (dateString.includes('-')) {
+      return parseInt(dateString.split('-')[0]);
+    }
+    return null;
+  }
+
+  // ✅ Cargar partes desde JSON
+  async function loadPartes() {
+    const container = document.getElementById('partesListContainer');
+    try {
+      const jsonPath = "partesid.json";
+      console.log("Intentando cargar JSON desde:", jsonPath);
+      const response = await fetch(jsonPath);
+      
+      if (!response.ok) {
+        const errorDetails = await response.text();
+        throw new Error(`Error HTTP ${response.status}: ${errorDetails}`);
+      }
+      
+      const partes = await response.json();
+      console.log("Datos recibidos:", partes);
+      
+      if (!Array.isArray(partes)) {
+        throw new Error("El formato del JSON no es válido. Se esperaba un array.");
+      }
+      
+      const html = partes.map(parte => {
+        if (!parte.id || !parte.description) {
+          console.warn("Parte con formato incorrecto:", parte);
+          return '';
+        }
+        return `
+          <div class="list-group-item">
+            <div class="form-check">
+              <input class="form-check-input parte-checkbox" type="checkbox" 
+                     value="${parte.id}" id="parte-${parte.id}">
+              <label class="form-check-label" for="parte-${parte.id}">
+                <strong>${parte.id}</strong> - ${parte.description}
+              </label>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html || '<div class="alert alert-warning">No hay partes disponibles</div>';
+
+      // Restaurar selecciones previas
+      selectedPartes.forEach(id => {
+        const checkbox = document.querySelector(`input[value="${id}"]`);
+        if (checkbox) checkbox.checked = true;
+      });
+
+      // Configurar filtro en tiempo real
+      document.getElementById('buscarParteInput').addEventListener('input', filterPartes);
+
+    } catch (error) {
+      console.error("Error al cargar partes:", error);
+      container.innerHTML = `
+        <div class="alert alert-danger">
+          <strong>Error al cargar las partes</strong><br>
+          ${error.message}<br>
+          <small>Verifique la consola para más detalles</small>
+        </div>`;
+    }
+  }
 
   // ✅ Filtrar partes en el modal
   function filterPartes() {
@@ -172,39 +190,6 @@ async function loadPartes() {
     });
   }
 
-  // ✅ Cargar tabla desde Supabase
-  async function updateTable() {
-    const tbody = document.querySelector('#retrabajosTable tbody');
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center">Cargando datos...</td></tr>`;
-
-    const { data, error } = await supabaseClient.from('retrabajos').select('*');
-
-    if (error) {
-      console.error("Error al cargar datos:", error);
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center">Error al cargar los datos</td></tr>`;
-      return;
-    }
-
-    const filteredData = filterData(data);
-
-    if (filteredData.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center">No hay datos</td></tr>`;
-    } else {
-      tbody.innerHTML = filteredData.map(item => `
-        <tr>
-          <td>${item.fecha}</td>
-          <td>${item.orden}</td>
-          <td>${item.tipoDefecto}</td>
-          <td>${item.celda}</td>
-          <td>${item.codigoDefecto}</td>
-          <td>${item.parteId}</td>
-          <td>${item.cantidad}</td>
-          <td>${item.nombreoperador}</td>
-        </tr>
-      `).join('');
-    }
-  }
-
   // ✅ Filtrar datos por celda y fecha
   function filterData(data) {
     let filtered = [...data];
@@ -233,14 +218,125 @@ async function loadPartes() {
     return new Date(year, month - 1, day);
   }
 
+  // ✅ Renderizar tabla con paginación
+  function renderTable(tableId, data, page) {
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const pageData = data.slice(startIndex, endIndex);
+
+    if (pageData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center">No hay datos para mostrar</td></tr>`;
+    } else {
+      tbody.innerHTML = pageData.map(item => `
+        <tr>
+          <td>${item.fecha}</td>
+          <td>${item.orden}</td>
+          <td>${item.tipoDefecto}</td>
+          <td>${item.celda}</td>
+          <td>${item.codigoDefecto}</td>
+          <td>${item.parteId}</td>
+          <td>${item.cantidad}</td>
+          <td>${item.nombreoperador}</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  // ✅ Actualizar información de paginación
+  function updatePaginationInfo(tabName, data, currentPage) {
+    const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE) || 1;
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+    const endIndex = Math.min(currentPage * ITEMS_PER_PAGE, data.length);
+
+    document.getElementById(`info${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).textContent = 
+      data.length > 0 ? `${startIndex}-${endIndex} de ${data.length} registros` : '0 registros';
+    
+    document.getElementById(`currentPage${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).textContent = currentPage;
+    document.getElementById(`totalPages${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).textContent = totalPages;
+
+    // Actualizar estado de botones
+    const prevBtn = document.getElementById(`prev${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    const nextBtn = document.getElementById(`next${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    
+    if (prevBtn) prevBtn.disabled = currentPage === 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+  }
+
+  // ✅ Cargar y separar datos por año
+  async function updateTable() {
+    const { data, error } = await supabaseClient.from('retrabajos').select('*');
+
+    if (error) {
+      console.error("Error al cargar datos:", error);
+      return;
+    }
+
+    // Aplicar filtros
+    const filteredData = filterData(data);
+
+    // Separar datos por año
+    const data2026 = filteredData.filter(item => getYearFromDate(item.fecha) === 2026);
+    const dataAnteriores = filteredData.filter(item => {
+      const year = getYearFromDate(item.fecha);
+      return year && year < 2026;
+    });
+
+    // Actualizar estado de paginación
+    paginationState.todos.data = filteredData;
+    paginationState.year2026.data = data2026;
+    paginationState.anteriores.data = dataAnteriores;
+
+    // Renderizar todas las tablas
+    renderTable('retrabajosTableTodos', paginationState.todos.data, paginationState.todos.currentPage);
+    renderTable('retrabajosTable2026', paginationState.year2026.data, paginationState.year2026.currentPage);
+    renderTable('retrabajosTableAnteriores', paginationState.anteriores.data, paginationState.anteriores.currentPage);
+
+    // Actualizar información de paginación
+    updatePaginationInfo('todos', paginationState.todos.data, paginationState.todos.currentPage);
+    updatePaginationInfo('2026', paginationState.year2026.data, paginationState.year2026.currentPage);
+    updatePaginationInfo('anteriores', paginationState.anteriores.data, paginationState.anteriores.currentPage);
+  }
+
+  // ✅ Configurar controles de paginación
+  function setupPaginationControls(tabName) {
+    const prevBtn = document.getElementById(`prev${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    const nextBtn = document.getElementById(`next${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    const stateKey = tabName.toLowerCase().replace('2026', 'year2026');
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (paginationState[stateKey].currentPage > 1) {
+          paginationState[stateKey].currentPage--;
+          const tableId = tabName === 'todos' ? 'retrabajosTableTodos' : 
+                          tabName === '2026' ? 'retrabajosTable2026' : 'retrabajosTableAnteriores';
+          renderTable(tableId, paginationState[stateKey].data, paginationState[stateKey].currentPage);
+          updatePaginationInfo(tabName, paginationState[stateKey].data, paginationState[stateKey].currentPage);
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(paginationState[stateKey].data.length / ITEMS_PER_PAGE) || 1;
+        if (paginationState[stateKey].currentPage < totalPages) {
+          paginationState[stateKey].currentPage++;
+          const tableId = tabName === 'todos' ? 'retrabajosTableTodos' : 
+                          tabName === '2026' ? 'retrabajosTable2026' : 'retrabajosTableAnteriores';
+          renderTable(tableId, paginationState[stateKey].data, paginationState[stateKey].currentPage);
+          updatePaginationInfo(tabName, paginationState[stateKey].data, paginationState[stateKey].currentPage);
+        }
+      });
+    }
+  }
+
   // ✅ Insertar datos en Supabase
   document.getElementById('retrabajoForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     if (!validateForm()) return;
 
-    
-    const fechaInput = document.getElementById('fechaCreacion').value; // ✅ Definimos la variable
-    const fecha = convertirFechaFormatoISO(fechaInput); // Ahora sí funciona
+    const fechaInput = document.getElementById('fechaCreacion').value;
+    const fecha = convertirFechaFormatoISO(fechaInput);
     const orden = document.getElementById('numeroOrden').value;
     const tipoDefecto = document.getElementById('tipoDefecto').value;
     const celda = document.getElementById('celda').value;
@@ -275,15 +371,20 @@ async function loadPartes() {
 
   // ✅ Botones de exportación
   document.getElementById('exportExcelBtn').addEventListener('click', function () {
-    const table = document.querySelector('#retrabajosTable');
-    const wb = XLSX.utils.table_to_book(table, { sheet: "Retrabajos" });
+    // Obtener la pestaña activa
+    const activeTab = document.querySelector('.tab-pane.active');
+    const activeTable = activeTab.querySelector('table');
+    const wb = XLSX.utils.table_to_book(activeTable, { sheet: "Retrabajos" });
     XLSX.writeFile(wb, `Retrabajos_${new Date().toISOString().slice(0, 10)}.xlsx`);
   });
 
   document.getElementById('exportPdfBtn').addEventListener('click', function () {
     const doc = new jspdf.jsPDF();
-    const head = [['Fecha', 'Orden', 'Tipo Defecto', 'Celda', 'nombre del operador', 'Código', 'Parte', 'Cantidad']];
-    const body = Array.from(document.querySelectorAll('#retrabajosTable tbody tr')).map(row => {
+    const activeTab = document.querySelector('.tab-pane.active');
+    const activeTable = activeTab.querySelector('table');
+    
+    const head = [['Fecha', 'Orden', 'Tipo Defecto', 'Celda', 'Código', 'Parte', 'Cantidad', 'Operador']];
+    const body = Array.from(activeTable.querySelectorAll('tbody tr')).map(row => {
       return Array.from(row.children).map(cell => cell.innerText);
     });
 
@@ -309,6 +410,11 @@ async function loadPartes() {
   document.getElementById('limpiarFormularioBtn')?.addEventListener('click', resetForm);
   document.getElementById('filtroCelda')?.addEventListener('change', updateTable);
   document.getElementById('filtroFecha')?.addEventListener('input', updateTable);
+
+  // Configurar controles de paginación para cada pestaña
+  setupPaginationControls('todos');
+  setupPaginationControls('2026');
+  setupPaginationControls('anteriores');
 
   // ✅ Carga inicial
   updateTable();
