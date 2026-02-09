@@ -9,10 +9,19 @@ document.addEventListener('DOMContentLoaded', async function () {
   
   // Variables de paginación
   const ITEMS_PER_PAGE = 25;
+  const MODAL_ITEMS_PER_PAGE = 50;
   let paginationState = {
     todos: { currentPage: 1, totalPages: 1, data: [] },
     year2026: { currentPage: 1, totalPages: 1, data: [] },
     anteriores: { currentPage: 1, totalPages: 1, data: [] }
+  };
+  
+  // Variables para paginación del modal
+  let modalPaginationState = {
+    currentPage: 1,
+    totalPages: 1,
+    allPartes: [],
+    filteredPartes: []
   };
 
   // ✅ Inicialización de Flatpickr
@@ -51,6 +60,62 @@ document.addEventListener('DOMContentLoaded', async function () {
     return null;
   }
 
+  // ✅ Renderizar partes en el modal con paginación
+  function renderModalPartes(partes, page) {
+    const container = document.getElementById('partesListContainer');
+    const startIndex = (page - 1) * MODAL_ITEMS_PER_PAGE;
+    const endIndex = startIndex + MODAL_ITEMS_PER_PAGE;
+    const pagePartes = partes.slice(startIndex, endIndex);
+
+    if (pagePartes.length === 0) {
+      container.innerHTML = '<div class="alert alert-warning">No hay partes disponibles</div>';
+      return;
+    }
+
+    const html = pagePartes.map(parte => {
+      if (!parte.id || !parte.description) {
+        console.warn("Parte con formato incorrecto:", parte);
+        return '';
+      }
+      const isChecked = selectedPartes.includes(parte.id) ? 'checked' : '';
+      return `
+        <div class="list-group-item parte-item">
+          <div class="form-check">
+            <input class="form-check-input parte-checkbox" type="checkbox" 
+                   value="${parte.id}" id="parte-${parte.id}" ${isChecked}>
+            <label class="form-check-label" for="parte-${parte.id}">
+              <strong>${parte.id}</strong> - ${parte.description}
+            </label>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = html;
+  }
+
+  // ✅ Actualizar información de paginación del modal
+  function updateModalPaginationInfo() {
+    const totalPages = Math.ceil(modalPaginationState.filteredPartes.length / MODAL_ITEMS_PER_PAGE) || 1;
+    const startIndex = (modalPaginationState.currentPage - 1) * MODAL_ITEMS_PER_PAGE + 1;
+    const endIndex = Math.min(modalPaginationState.currentPage * MODAL_ITEMS_PER_PAGE, modalPaginationState.filteredPartes.length);
+
+    modalPaginationState.totalPages = totalPages;
+
+    document.getElementById('infoModal').textContent = 
+      modalPaginationState.filteredPartes.length > 0 ? `${startIndex}-${endIndex} de ${modalPaginationState.filteredPartes.length} partes` : '0 partes';
+    
+    document.getElementById('currentPageModal').textContent = modalPaginationState.currentPage;
+    document.getElementById('totalPagesModal').textContent = totalPages;
+
+    // Actualizar estado de botones
+    const prevBtn = document.getElementById('prevModal');
+    const nextBtn = document.getElementById('nextModal');
+    
+    if (prevBtn) prevBtn.disabled = modalPaginationState.currentPage === 1;
+    if (nextBtn) nextBtn.disabled = modalPaginationState.currentPage >= totalPages;
+  }
+
   // ✅ Cargar partes desde JSON
   async function loadPartes() {
     const container = document.getElementById('partesListContainer');
@@ -70,35 +135,22 @@ document.addEventListener('DOMContentLoaded', async function () {
       if (!Array.isArray(partes)) {
         throw new Error("El formato del JSON no es válido. Se esperaba un array.");
       }
-      
-      const html = partes.map(parte => {
-        if (!parte.id || !parte.description) {
-          console.warn("Parte con formato incorrecto:", parte);
-          return '';
-        }
-        return `
-          <div class="list-group-item">
-            <div class="form-check">
-              <input class="form-check-input parte-checkbox" type="checkbox" 
-                     value="${parte.id}" id="parte-${parte.id}">
-              <label class="form-check-label" for="parte-${parte.id}">
-                <strong>${parte.id}</strong> - ${parte.description}
-              </label>
-            </div>
-          </div>
-        `;
-      }).join('');
 
-      container.innerHTML = html || '<div class="alert alert-warning">No hay partes disponibles</div>';
+      // Guardar todas las partes y resetear paginación
+      modalPaginationState.allPartes = partes;
+      modalPaginationState.filteredPartes = partes;
+      modalPaginationState.currentPage = 1;
 
-      // Restaurar selecciones previas
-      selectedPartes.forEach(id => {
-        const checkbox = document.querySelector(`input[value="${id}"]`);
-        if (checkbox) checkbox.checked = true;
-      });
+      // Renderizar primera página
+      renderModalPartes(modalPaginationState.filteredPartes, modalPaginationState.currentPage);
+      updateModalPaginationInfo();
 
-      // Configurar filtro en tiempo real
-      document.getElementById('buscarParteInput').addEventListener('input', filterPartes);
+      // Configurar filtro en tiempo real (solo una vez)
+      const searchInput = document.getElementById('buscarParteInput');
+      if (searchInput && !searchInput.dataset.listenerAdded) {
+        searchInput.addEventListener('input', filterPartes);
+        searchInput.dataset.listenerAdded = 'true';
+      }
 
     } catch (error) {
       console.error("Error al cargar partes:", error);
@@ -114,10 +166,24 @@ document.addEventListener('DOMContentLoaded', async function () {
   // ✅ Filtrar partes en el modal
   function filterPartes() {
     const text = document.getElementById('buscarParteInput').value.toLowerCase();
-    document.querySelectorAll('.list-group-item').forEach(item => {
-      const content = item.textContent.toLowerCase();
-      item.style.display = content.includes(text) ? '' : 'none';
-    });
+    
+    if (text === '') {
+      // Si no hay filtro, mostrar todas las partes
+      modalPaginationState.filteredPartes = modalPaginationState.allPartes;
+    } else {
+      // Filtrar partes por texto
+      modalPaginationState.filteredPartes = modalPaginationState.allPartes.filter(parte => {
+        const searchText = `${parte.id} ${parte.description}`.toLowerCase();
+        return searchText.includes(text);
+      });
+    }
+    
+    // Resetear a la primera página después de filtrar
+    modalPaginationState.currentPage = 1;
+    
+    // Renderizar resultados filtrados
+    renderModalPartes(modalPaginationState.filteredPartes, modalPaginationState.currentPage);
+    updateModalPaginationInfo();
   }
 
   // ✅ Actualizar visualización de partes seleccionadas
@@ -415,6 +481,23 @@ document.addEventListener('DOMContentLoaded', async function () {
   setupPaginationControls('todos');
   setupPaginationControls('2026');
   setupPaginationControls('anteriores');
+
+  // Configurar controles de paginación del modal
+  document.getElementById('prevModal')?.addEventListener('click', function() {
+    if (modalPaginationState.currentPage > 1) {
+      modalPaginationState.currentPage--;
+      renderModalPartes(modalPaginationState.filteredPartes, modalPaginationState.currentPage);
+      updateModalPaginationInfo();
+    }
+  });
+
+  document.getElementById('nextModal')?.addEventListener('click', function() {
+    if (modalPaginationState.currentPage < modalPaginationState.totalPages) {
+      modalPaginationState.currentPage++;
+      renderModalPartes(modalPaginationState.filteredPartes, modalPaginationState.currentPage);
+      updateModalPaginationInfo();
+    }
+  });
 
   // ✅ Carga inicial
   updateTable();
